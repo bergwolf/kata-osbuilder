@@ -172,6 +172,10 @@ if [ -n "${USE_DOCKER}" ] ; then
 		--build-arg https_proxy="${https_proxy}" \
 		-t "${image_name}" "${distro_config_dir}"
 
+	vol_maps='-v "${script_dir}":"/osbuilder" -v "${ROOTFS_DIR}":"/rootfs" -v "${GOPATH}":"${GOPATH}"'
+
+	[ -n "${KERNEL_MODULES_DIR}" ] && vol_maps+=' -v "${KERNEL_MODULES_DIR}":"${KERNEL_MODULES_DIR}"'
+
 	#Make sure we use a compatible runtime to build rootfs
 	# In case Clear Containers Runtime is installed we dont want to hit issue:
 	#https://github.com/clearcontainers/runtime/issues/828
@@ -186,10 +190,7 @@ if [ -n "${USE_DOCKER}" ] ; then
 		--env AGENT_INIT="${AGENT_INIT}" \
 		--env GOPATH="${GOPATH}" \
 		--env KERNEL_MODULES_DIR="${KERNEL_MODULES_DIR}" \
-		-v "${script_dir}":"/osbuilder" \
-		-v "${ROOTFS_DIR}":"/rootfs" \
-		-v "${KERNEL_MODULES_DIR}":"${KERNEL_MODULES_DIR}" \
-		-v "${GOPATH}":"${GOPATH}" \
+		${vol_maps} \
 		${image_name} \
 		bash /osbuilder/rootfs.sh "${distro}"
 
